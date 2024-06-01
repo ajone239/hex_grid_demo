@@ -32,11 +32,12 @@ class HexGrid {
     this.width = width
     this.height = height
     this.radius = radius
+    this.short_radius = this.radius * sin(PI / 3)
 
     // This is the hexes in the x axis tip to tip
     this.width_in_hexes = int(this.width / (2 * this.radius))
     // This is the
-    this.height_in_hexes = int(this.height / (1 * (this.radius * sin(PI / 3)))) + 2
+    this.height_in_hexes = int(this.height / (1 * this.short_radius))
 
     // Make centers
     this.centers = new Array(this.width_in_hexes)
@@ -45,9 +46,9 @@ class HexGrid {
       this.centers[i] = new Array(this.height_in_hexes)
 
       for (var j = 0; j < this.height_in_hexes; j++) {
-        let short_radius = this.radius * sin(PI / 3)
-        let x = (this.radius * 3 * i) + ((j & 1) * 1.5 * this.radius)
-        let y = short_radius * 1 * j
+        let _i = i - 10
+        let x = (this.radius * 3 * _i) + ((j) * 1.5 * this.radius)
+        let y = this.short_radius * j
 
         this.centers[i][j] = { x, y }
       }
@@ -114,20 +115,17 @@ class HexGrid {
 
     let neighbors = []
 
-    let jodd = j & 1
-    let jeven = (j & 1) ^ 1
-
     // east
-    neighbors.push(this.hexes[i + jodd][j - 1])
-    neighbors.push(this.hexes[i + jodd][j + 1])
+    neighbors.push(this.hexes[i - 1][j + 1])
+    neighbors.push(this.hexes[i - 1][j + 2])
     // west
-    neighbors.push(this.hexes[i - jeven][j - 1])
-    neighbors.push(this.hexes[i - jeven][j + 1])
+    neighbors.push(this.hexes[i + 1][j - 1])
+    neighbors.push(this.hexes[i + 1][j - 2])
 
     // north
-    neighbors.push(this.hexes[i][j + 2])
+    neighbors.push(this.hexes[i][j + 1])
     // south
-    neighbors.push(this.hexes[i][j - 2])
+    neighbors.push(this.hexes[i][j - 1])
 
     return neighbors
   }
@@ -188,7 +186,11 @@ class Hexagon extends Polygon {
       fill(200)
     }
 
+
     super.show(rotation)
+
+    fill(0)
+    text(`${this.i},${this.j}`, this.x - (this.r / 2), this.y)
 
     pop()
   }
