@@ -10,6 +10,7 @@ function setup() {
 function draw() {
   background(50)
   grid.show()
+  grid.show_dots()
 }
 
 function mousePressed() {
@@ -35,9 +36,9 @@ class HexGrid {
     this.short_radius = this.radius * sin(PI / 3)
 
     // This is the hexes in the x axis tip to tip
-    this.width_in_hexes = int(this.width / (2 * this.radius))
+    this.width_in_hexes = int(this.width / (1.5 * this.radius))
     // This is the
-    this.height_in_hexes = int(this.height / (1 * this.short_radius))
+    this.height_in_hexes = int(this.width / (2 * this.short_radius))
 
     // Make centers
     this.centers = new Array(this.width_in_hexes)
@@ -46,9 +47,8 @@ class HexGrid {
       this.centers[i] = new Array(this.height_in_hexes)
 
       for (var j = 0; j < this.height_in_hexes; j++) {
-        let _i = i - 10
-        let x = (this.radius * 3 * _i) + ((j) * 1.5 * this.radius)
-        let y = this.short_radius * j
+        let x = (this.radius * 1.5 * i)
+        let y = (this.short_radius * 2 * j) + (this.short_radius * i)
 
         this.centers[i][j] = { x, y }
       }
@@ -74,6 +74,15 @@ class HexGrid {
       for (var j = 0; j < this.height_in_hexes; j++) {
         let hex = this.hexes[i][j]
         hex.show()
+      }
+    }
+  }
+
+  show_dots() {
+    for (var i = 0; i < this.width_in_hexes; i++) {
+      for (var j = 0; j < this.height_in_hexes; j++) {
+        let hex = this.hexes[i][j]
+        ellipse(hex.x, hex.y, 10)
       }
     }
   }
@@ -110,25 +119,48 @@ class HexGrid {
   }
 
   get_neighbors(hex) {
-    let i = hex.i
-    let j = hex.j
+    let h_i = hex.i
+    let h_j = hex.j
 
     let neighbors = []
 
-    // east
-    neighbors.push(this.hexes[i - 1][j + 1])
-    neighbors.push(this.hexes[i - 1][j + 2])
-    // west
-    neighbors.push(this.hexes[i + 1][j - 1])
-    neighbors.push(this.hexes[i + 1][j - 2])
+    let directions = [
+      // east
+      { i: -1, j: 1 },
+      { i: -1, j: 0 },
+      // west
+      { i: 1, j: 0 },
+      { i: 1, j: -1 },
+      // north
+      { i: 0, j: 1 },
+      // south
+      { i: 0, j: - 1 },
+    ]
 
-    // north
-    neighbors.push(this.hexes[i][j + 1])
-    // south
-    neighbors.push(this.hexes[i][j - 1])
+    for (let d of directions) {
+      let { i, j } = d
+      let test_hex = this.get_hex_bounded(h_i + i, h_j + j)
+      if (test_hex) {
+        neighbors.push(test_hex)
+      }
+    }
 
-    return neighbors
+    return neighbors;
   }
+
+  get_hex_bounded(i, j) {
+    if (
+      i < 0 ||
+      i >= this.width_in_hexes ||
+      j < 0 ||
+      j >= this.height_in_hexes
+    ) {
+      return undefined
+    }
+
+    return this.hexes[i][j]
+  }
+
 }
 
 class Polygon {
